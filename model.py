@@ -1,4 +1,5 @@
 import pandas
+import numpy as np
 import nltk
 from nltk import word_tokenize, pos_tag
 import string
@@ -11,6 +12,8 @@ from nltk.stem import WordNetLemmatizer
 #nltk.download('averaged_perceptron_tagger')
 #nltk.download('stopwords')
 #nltk.download('wordnet')
+
+stop = stopwords.words('english')
 
 def sentenceProcessing(sentence):
     # Lowercasing
@@ -30,12 +33,27 @@ def sentenceProcessing(sentence):
     for i in range(0, len(tokens)):
         tokens[i] = lemmatizer.lemmatize(tokens[i])
 
-    return " ".join(tokens)
+    return set(tokens)
 
-stop = stopwords.words('english')
+def bagOfWords(vocab, sentence):
+    arr = np.zeros(len(vocab))
+    for i in range(0,len(vocab)):
+        if vocab[i] in sentence:
+            arr[i] += 1
+
+    return arr
+
 classes  = ["events", "personal", "work", "grocery"]
+df = pandas.read_csv("test.csv")
 
-df = pandas.read_csv("ToDoList//data.csv")
+vocab = set()
+data = []
 
-for i in df.iloc[:,0]:
-    print(sentenceProcessing(i))
+for i in range(0,len(df)):
+    sentence = df.iloc[i,0]
+    tokens = sentenceProcessing(sentence)
+    data.append(tokens)
+    vocab = vocab.union(tokens)
+
+vocab = list(vocab)
+
